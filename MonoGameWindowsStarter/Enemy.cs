@@ -72,7 +72,7 @@ namespace MonoGameWindowsStarter
 
             if (enemyRect.X < 0)
             {
-                bounceSFX.Play();
+               // bounceSFX.Play();
                 enemyRect.X = 920;
 
                 enemyRect.Y = ran.Next(400, 535);

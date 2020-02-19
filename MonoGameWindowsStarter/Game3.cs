@@ -18,11 +18,11 @@ namespace MonoGameWindowsStarter
 
         Player player;
         Enemy enemy;
-
+        
         Texture2D win;
         Texture2D lose;
-
-
+        public Enemy[] enemies;
+        int score;
 
         public Rectangle finishRect;
         Texture2D finish;
@@ -38,7 +38,9 @@ namespace MonoGameWindowsStarter
             Content.RootDirectory = "Content";
             player = new Player(this);
             enemy = new Enemy(this);
+            enemies[0] = enemy;
         }
+        \
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -57,7 +59,10 @@ namespace MonoGameWindowsStarter
 
             graphics.ApplyChanges();
             player.Initialize();
-            enemy.Initialize();
+            score = 0;
+            
+            enemies[0].Initialize();
+            
 
             base.Initialize();
         }
@@ -113,15 +118,20 @@ namespace MonoGameWindowsStarter
                 Exit();
             var keyboardState = Keyboard.GetState();
 
+            score = player.score;
+
             if (keyboardState.IsKeyDown(Keys.R))
             {
                 won = false;
                 lost = false;
+                
                 Initialize();
+                
             }
-            player.Update(gameTime, enemy);
-            enemy.Update(gameTime);
+            player.Update(gameTime, enemies);
+            enemies[0].Update(gameTime);
 
+            
             base.Update(gameTime);
         }
 
@@ -134,12 +144,12 @@ namespace MonoGameWindowsStarter
             GraphicsDevice.Clear(Color.AliceBlue);
             spriteBatch.Begin();
 
-            spriteBatch.Draw(texture, new Rectangle(0, 0, 1042, 345), Color.Black);
+            spriteBatch.Draw(texture, new Rectangle(0, 0, 1042, 300), Color.Black);
             spriteBatch.Draw(texture, new Rectangle(0, 600, 1042, 175), Color.Black);
             spriteBatch.Draw(finish, finishRect, Color.Yellow);
             player.Draw(spriteBatch);
-            enemy.Draw(spriteBatch);
-
+            enemies[0].Draw(spriteBatch);
+            spriteBatch.DrawString(spriteFont, "SCORE: " + score, new Vector2(850, 300), Color.DeepPink);
             if (won && !lost)
             {
 

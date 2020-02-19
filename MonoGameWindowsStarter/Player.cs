@@ -30,7 +30,7 @@ namespace MonoGameWindowsStarter
         /// <summary>
         /// How quickly the player should move
         /// </summary>
-        const float PLAYER_SPEED = 250;
+        float PLAYER_SPEED;
 
         /// <summary>
         /// The width of the animation frames
@@ -50,7 +50,7 @@ namespace MonoGameWindowsStarter
         public SoundEffect winSFX;
 
         Rectangle manRect;
-
+        
         Texture2D man;
         Rectangle testmanRec;
         //animation
@@ -58,6 +58,7 @@ namespace MonoGameWindowsStarter
         State state;
         TimeSpan timer;
         int frame;
+        public int score;
         // Vector2 position;
 
 
@@ -70,12 +71,14 @@ namespace MonoGameWindowsStarter
             state = State.Idle;
             testmanRec = new Rectangle(50, 400, 75, 75);
             
+            
         }
 
         public void Initialize()
         {
             testmanRec = new Rectangle(50, 400, 75, 75);
-
+            score = 0;
+            PLAYER_SPEED = 250;
 
         }
 
@@ -95,12 +98,12 @@ namespace MonoGameWindowsStarter
         /// Updates 
         /// </summary>
         /// <param name="gameTime">The game's GameTime</param>
-        public void Update(GameTime gameTime, Enemy enemy)
+        public void Update(GameTime gameTime, Enemy[] enemy)
         {
 
             var keyboardState = Keyboard.GetState();
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            var badmanRect = enemy.enemyRect;
+            var badmanRect = enemy[0].enemyRect;
             /*movement*/
             // move up down left right
             if (keyboardState.IsKeyDown(Keys.Up))
@@ -157,10 +160,10 @@ namespace MonoGameWindowsStarter
 
             /*bounds*/
             // keeps man between the two black bars
-            if (testmanRec.Y < 345)
+            if (testmanRec.Y < 300)
             {
                 //position.Y = 345;
-                testmanRec.Y = 345;
+                testmanRec.Y = 300;
             }
 
             if (testmanRec.Y > 600 - testmanRec.Height)
@@ -183,13 +186,14 @@ namespace MonoGameWindowsStarter
             }
 
             
-            if (testmanRec.Intersects(enemy.enemyRect))
+
+            if (testmanRec.Intersects(enemy[0].enemyRect))
             {
-                hitSFX.Play();
+               // hitSFX.Play();
                 game.lost = true;
                 game.won = false;
-                enemy.enemyRect.X = 920;
-                enemy.enemyRect.Y = enemy.ran.Next(400, 535);
+                enemy[0].enemyRect.X = 920;
+                enemy[0].enemyRect.Y = enemy[0].ran.Next(400, 535);
                 badmanRect.X -= 5;
                 //position.X = 50;
                 testmanRec.X = 50;
@@ -197,17 +201,27 @@ namespace MonoGameWindowsStarter
 
             if (testmanRec.Intersects(game.finishRect))
             {
-                winSFX.Play();
-                game.won = true;
-                game.lost = false;
-                enemy.enemyRect.X = 920;
-                enemy.enemyRect.Y = enemy.ran.Next(400, 535);
+                //winSFX.Play();
+                //game.won = true;
+                score++;
+                PLAYER_SPEED += 100;
+                
+                enemy[0].enemyRect.X = 920;
+                enemy[0].enemyRect.Y = enemy[0].ran.Next(400, 535);
                 //badmanRect.X = 825;
                 //badmanRect.X -= 5;
                // position.X = 50;
                 testmanRec.X = 50;
             }
 
+            if(score == 5)
+            {
+                game.won = true;
+                game.lost = false;
+                enemy[0].enemyRect.X = 920;
+                enemy[0].enemyRect.Y = enemy[0].ran.Next(400, 535);
+                testmanRec.X = 50;
+            }
 
         }
 
