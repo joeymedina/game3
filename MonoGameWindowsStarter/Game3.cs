@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -8,27 +9,35 @@ namespace MonoGameWindowsStarter
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game
+    public class Game3 : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Texture2D man;
+        SpriteFont spriteFont;
         Texture2D texture;
-        Texture2D badman;
+
+        Player player;
+        Enemy enemy;
+
         Texture2D win;
         Texture2D lose;
-        Rectangle manRect;
-        Rectangle badmanRect;
-        Rectangle finishRect;
-        Texture2D finish;
-        Random ran;
-        bool won;
-        bool lost;
 
-        public Game1()
+
+
+        public Rectangle finishRect;
+        Texture2D finish;
+
+        public bool won;
+        public bool lost;
+
+
+
+        public Game3()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            player = new Player(this);
+            enemy = new Enemy(this);
         }
 
         /// <summary>
@@ -42,8 +51,13 @@ namespace MonoGameWindowsStarter
             // TODO: Add your initialization logic here
             graphics.PreferredBackBufferWidth = 1042;
             graphics.PreferredBackBufferHeight = 768;
-            ran = new Random();
+
+            /**Enemy Class**/
+            //ran = new Random();
+
             graphics.ApplyChanges();
+            player.Initialize();
+            enemy.Initialize();
 
             base.Initialize();
         }
@@ -56,28 +70,27 @@ namespace MonoGameWindowsStarter
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            man = Content.Load<Texture2D>("man2");
-            texture = Content.Load<Texture2D>("pixel");
-            finish = Content.Load<Texture2D>("finish");
-            badman = Content.Load<Texture2D>("badman");
-            win = Content.Load<Texture2D>("win");
-            lose = Content.Load<Texture2D>("lose");
-            manRect.X = 50;
-            manRect.Y = 400;
-            manRect.Width = 75;
-            manRect.Height = 75;
-
-            if (!won)
-            {
-                badmanRect.X = 800;
-                badmanRect.Y = ran.Next(400, 535);
-                badmanRect.Width = 55;
-                badmanRect.Height = 55;
-            }
-            finishRect = new Rectangle(925, 400, 100, 200);
             won = false;
             lost = false;
-            // TODO: use this.Content to load your game content here
+            spriteFont = Content.Load<SpriteFont>("defaultFont");
+
+            player.LoadContent(Content);
+
+
+            enemy.LoadContent(Content);
+
+            texture = Content.Load<Texture2D>("pixel");
+            finish = Content.Load<Texture2D>("finish");
+
+            win = Content.Load<Texture2D>("win");
+            lose = Content.Load<Texture2D>("lose");
+
+
+            finishRect = new Rectangle(925, 400, 100, 200);
+
+
+
+
         }
 
         /// <summary>
@@ -86,7 +99,7 @@ namespace MonoGameWindowsStarter
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+
         }
 
         /// <summary>
@@ -98,78 +111,16 @@ namespace MonoGameWindowsStarter
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-
             var keyboardState = Keyboard.GetState();
 
-            if (keyboardState.IsKeyDown(Keys.Up))
+            if (keyboardState.IsKeyDown(Keys.R))
             {
-                manRect.Y -= 5;
+                won = false;
+                lost = false;
+                Initialize();
             }
-            if (keyboardState.IsKeyDown(Keys.Down))
-            {
-                manRect.Y += 5;
-            }
-
-            if (keyboardState.IsKeyDown(Keys.Left))
-            {
-                manRect.X -= 5;
-            }
-            if (keyboardState.IsKeyDown(Keys.Right))
-            {
-                manRect.X += 5;
-            }
-            
-    
-            //top
-            if (manRect.Y < 345)
-            {
-                manRect.Y = 345;
-            }
-
-            if (manRect.Y > 600 - manRect.Height)
-            {
-                manRect.Y = 600 - manRect.Height;
-            }
-
- 
-
-
-            if (manRect.X < 0)
-            {
-                manRect.X = 0;
-            }
-
-            if (manRect.X > GraphicsDevice.Viewport.Width - manRect.Width)
-            {
-                manRect.X = GraphicsDevice.Viewport.Width - manRect.Width;
-            }
-
-            if(!won) badmanRect.X -= 5;
-
-            if (badmanRect.X < 0)
-            {
-                badmanRect.X = 825;
-                badmanRect.Y = ran.Next(400, 535);
-            }
-
-            if (manRect.Intersects(badmanRect))
-            {
-                lost = true;
-                badmanRect.X = 825;
-                badmanRect.X -= 5;
-                manRect.X = 50;
-            }
-
-            if (manRect.Intersects(finishRect))
-            {
-                won = true;
-                badmanRect.X = 825;
-                badmanRect.X -= 5;
-                manRect.X = 50;
-            }
-            //if(manRect.Intersects())
-            // TODO: Add your update logic here
+            player.Update(gameTime, enemy);
+            enemy.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -183,27 +134,25 @@ namespace MonoGameWindowsStarter
             GraphicsDevice.Clear(Color.AliceBlue);
             spriteBatch.Begin();
 
-            spriteBatch.Draw(man, manRect, Color.White);
-
-            if (!won)
-            {
-                spriteBatch.Draw(badman, badmanRect, Color.White);
-            }
             spriteBatch.Draw(texture, new Rectangle(0, 0, 1042, 345), Color.Black);
             spriteBatch.Draw(texture, new Rectangle(0, 600, 1042, 175), Color.Black);
             spriteBatch.Draw(finish, finishRect, Color.Yellow);
+            player.Draw(spriteBatch);
+            enemy.Draw(spriteBatch);
 
-            if (won)
+            if (won && !lost)
             {
-                spriteBatch.Draw(win, new Rectangle(525, 384, 200, 100), Color.MediumPurple);
+
+                spriteBatch.DrawString(spriteFont, "YOU WIN WOO HOO!!!!!! \n press R to restart", new Vector2(325, 450), Color.Purple);
             }
-            if (lost)
+            if (lost && !won)
             {
-                spriteBatch.Draw(lose, new Rectangle(525, 384, 200, 100), Color.MediumVioletRed);
+
+                spriteBatch.DrawString(spriteFont, "YOU LOSE BOO HOO!!!!!! \n press R to restart", new Vector2(325, 450), Color.Red);
             }
 
             spriteBatch.End();
-            // TODO: Add your drawing code here
+
 
             base.Draw(gameTime);
         }
