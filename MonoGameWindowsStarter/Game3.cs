@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 
 namespace MonoGameWindowsStarter
 {
@@ -18,10 +19,10 @@ namespace MonoGameWindowsStarter
 
         Player player;
         Enemy enemy;
-        
+        List<Enemy> enemies = new List<Enemy>();
         Texture2D win;
         Texture2D lose;
-        public Enemy[] enemies;
+        
         int score;
 
         public Rectangle finishRect;
@@ -38,9 +39,10 @@ namespace MonoGameWindowsStarter
             Content.RootDirectory = "Content";
             player = new Player(this);
             enemy = new Enemy(this);
-            enemies[0] = enemy;
+            enemies.Add(enemy);
+            //enemies[0] = enemy;
         }
-        \
+        
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -61,7 +63,11 @@ namespace MonoGameWindowsStarter
             player.Initialize();
             score = 0;
             
-            enemies[0].Initialize();
+            foreach(Enemy en in enemies)
+            {
+            en.Initialize();
+            }
+            
             
 
             base.Initialize();
@@ -81,8 +87,12 @@ namespace MonoGameWindowsStarter
 
             player.LoadContent(Content);
 
+            //foreach (Enemy en in enemies)
+            //{
+            //    en.LoadContent(Content);
+            //}
 
-            enemy.LoadContent(Content);
+            
 
             texture = Content.Load<Texture2D>("pixel");
             finish = Content.Load<Texture2D>("finish");
@@ -117,21 +127,31 @@ namespace MonoGameWindowsStarter
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             var keyboardState = Keyboard.GetState();
-
+            
             score = player.score;
-
+            
             if (keyboardState.IsKeyDown(Keys.R))
             {
                 won = false;
                 lost = false;
                 
                 Initialize();
+
+                enemies.RemoveRange(1, enemies.Count - 1);
+
+            }
+            foreach (Enemy en in enemies)
+            {
+                
+                en.Update(gameTime);
                 
             }
             player.Update(gameTime, enemies);
-            enemies[0].Update(gameTime);
 
             
+
+
+
             base.Update(gameTime);
         }
 
@@ -148,7 +168,16 @@ namespace MonoGameWindowsStarter
             spriteBatch.Draw(texture, new Rectangle(0, 600, 1042, 175), Color.Black);
             spriteBatch.Draw(finish, finishRect, Color.Yellow);
             player.Draw(spriteBatch);
-            enemies[0].Draw(spriteBatch);
+
+            foreach (Enemy en in enemies)
+            {
+                
+                en.LoadContent(Content);
+               
+                en.Draw(spriteBatch);
+            }
+            
+
             spriteBatch.DrawString(spriteFont, "SCORE: " + score, new Vector2(850, 300), Color.DeepPink);
             if (won && !lost)
             {

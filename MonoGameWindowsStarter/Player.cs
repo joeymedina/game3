@@ -60,7 +60,7 @@ namespace MonoGameWindowsStarter
         int frame;
         public int score;
         // Vector2 position;
-
+        bool isAdded;
 
         public Player(Game3 game)
         {
@@ -98,12 +98,15 @@ namespace MonoGameWindowsStarter
         /// Updates 
         /// </summary>
         /// <param name="gameTime">The game's GameTime</param>
-        public void Update(GameTime gameTime, Enemy[] enemy)
+        public void Update(GameTime gameTime, List<Enemy> enemy)
         {
 
             var keyboardState = Keyboard.GetState();
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            var badmanRect = enemy[0].enemyRect;
+
+
+            
+            
             /*movement*/
             // move up down left right
             if (keyboardState.IsKeyDown(Keys.Up))
@@ -185,44 +188,64 @@ namespace MonoGameWindowsStarter
                 testmanRec.X = game.GraphicsDevice.Viewport.Width - testmanRec.Width;
             }
 
+
+            foreach (Enemy n in enemy)
+
+            {
+                var badmanRect = n.enemyRect;
+                if (testmanRec.Intersects(n.enemyRect))
+                {
+                    hitSFX.Play();
+                    game.lost = true;
+                    game.won = false;
+                    n.enemyRect.X = 920;
+                    n.enemyRect.Y = n.ran.Next(400, 535);
+                    badmanRect.X -= 5;
+                    //position.X = 50;
+                    testmanRec.X = 50;
+                }
+
+                if (testmanRec.Intersects(game.finishRect))
+                {
+                    winSFX.Play();
+                    //game.won = true;
+           
+                    score++;
+                    PLAYER_SPEED += 100;
+
+                    n.enemyRect.X = 920;
+                    n.enemyRect.Y = n.ran.Next(400, 535);
+                    //badmanRect.X = 825;
+                    //badmanRect.X -= 5;
+                    // position.X = 50;
+                    testmanRec.X = 50;
+                    if (score % 2 == 0 && score != 0)
+                    {
+
+                        isAdded = true;
+
+                    }
+                }
+
+                if (score == 5)
+                {
+                    game.won = true;
+                    game.lost = false;
+                    n.enemyRect.X = 920;
+                    n.enemyRect.Y = n.ran.Next(400, 535);
+                    testmanRec.X = 50;
+                }
+            }
+
             
-
-            if (testmanRec.Intersects(enemy[0].enemyRect))
+            if (isAdded)
             {
-               // hitSFX.Play();
-                game.lost = true;
-                game.won = false;
-                enemy[0].enemyRect.X = 920;
-                enemy[0].enemyRect.Y = enemy[0].ran.Next(400, 535);
-                badmanRect.X -= 5;
-                //position.X = 50;
-                testmanRec.X = 50;
+                var enemyA = new Enemy(game);
+                enemy.Add(enemyA);
+                enemyA.Initialize();
+               
+                isAdded = false;
             }
-
-            if (testmanRec.Intersects(game.finishRect))
-            {
-                //winSFX.Play();
-                //game.won = true;
-                score++;
-                PLAYER_SPEED += 100;
-                
-                enemy[0].enemyRect.X = 920;
-                enemy[0].enemyRect.Y = enemy[0].ran.Next(400, 535);
-                //badmanRect.X = 825;
-                //badmanRect.X -= 5;
-               // position.X = 50;
-                testmanRec.X = 50;
-            }
-
-            if(score == 5)
-            {
-                game.won = true;
-                game.lost = false;
-                enemy[0].enemyRect.X = 920;
-                enemy[0].enemyRect.Y = enemy[0].ran.Next(400, 535);
-                testmanRec.X = 50;
-            }
-
         }
 
         public void Draw(SpriteBatch spriteBatch)

@@ -11,40 +11,27 @@ using System.Threading.Tasks;
 
 namespace MonoGameWindowsStarter
 {
-    public class Enemy
+    public class Enemy: Enemy_Model
     {
-       public Rectangle enemyRect;
-
         Game3 game;
 
-        Texture2D badman;
-
-        SoundEffect bounceSFX;
-
-        public Random ran;
+        public Random ran = new Random();
         public Enemy(Game3 game)
         {
             this.game = game;
         }
-
+ 
         public void Initialize()
         {
-            ran = new Random();
             enemyRect = new Rectangle();
             if (!game.won)
             {
                 enemyRect.X = 920;
-
-                enemyRect.Y = ran.Next(400, 535);
+                enemyRect.Y = ran.Next(300, 535);
                 enemyRect.Width = 55;
                 enemyRect.Height = 55;
             }
 
-            //if (game.won || game.lost)
-            //{
-            //    enemyRect.X = 825;
-            //    enemyRect.Y = 400;
-            //}
         }
 
         /// <summary>
@@ -53,8 +40,6 @@ namespace MonoGameWindowsStarter
         /// <param name="content">The ContentManager to use</param>
         public void LoadContent(ContentManager content)
         {
-
-            
             badman = content.Load<Texture2D>("badman");
             bounceSFX = content.Load<SoundEffect>("bounce");
         }
@@ -72,13 +57,11 @@ namespace MonoGameWindowsStarter
 
             if (enemyRect.X < 0)
             {
-               // bounceSFX.Play();
+                bounceSFX.Play();
                 enemyRect.X = 920;
 
                 enemyRect.Y = ran.Next(400, 535);
             }
-
-
 
         }
 
@@ -88,6 +71,7 @@ namespace MonoGameWindowsStarter
             //{}
             if(enemyRect.X < 915)
             {
+
              spriteBatch.Draw(badman, enemyRect, Color.White);
             }
 
